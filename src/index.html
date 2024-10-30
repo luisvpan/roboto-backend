@@ -86,6 +86,19 @@
   <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"
   integrity="sha384-OoIbkvzsFFQAG88r+IqMAjyOtYDPGO0cqK5HF5Uosdy/zUEGySeAzytENMDynREd" crossorigin="anonymous"></script>
   <script>
+    // Estado del si el bot esta conectado o no
+    let isConnected = false;
+    let timeout;
+
+    // Función para manejar el temporizador
+    function resetConnectionTimeout() {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        isConnected = false;
+        console.log('Bot desconectado por inactividad');
+      }, 30000); // 30 segundos
+    }
+
     // Inicializar socket.io
     const socket = io();
     const video = document.getElementById('video');
@@ -101,16 +114,23 @@
 
     // Recibir stream de video
     socket.on('receive-video-stream', (data) => {
+      isConnected = true;
+      resetConnectionTimeout(); // Reiniciar el temporizador
       video.src = /*'data:image/jpeg;base64,' +*/ data;
     });
 
     // Recibir actualizaciones GPS
     socket.on('receive-gps-update', (data) => {
+      isConnected = true;
+      resetConnectionTimeout(); // Reiniciar el temporizador
       console.log('Receive coordinates', data);
       const { latitude, longitude } = data;
       marker.setLatLng([latitude, longitude]);
       map.panTo([latitude, longitude]);
     });
+
+    // Iniciar temporizador al comienzo
+    resetConnectionTimeout();
   </script>
 </body>
 

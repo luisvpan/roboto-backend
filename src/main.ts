@@ -6,6 +6,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+let lastBotVideoFrame: string = '';
+let lastBotGpsCoors: Coors = { latitude: 0, longitude: 0 };
+
 // Ruta para servir el cliente
 app.get('/', (req: Request, res: Response) => {
     res.sendFile(__dirname + '/index.html');
@@ -15,13 +18,14 @@ app.get('/', (req: Request, res: Response) => {
 io.on('connection', (socket) => {
     console.log('Cliente conectado');
 
-    socket.on('video-stream', (data: string) => {
+    socket.on('video-stream', (videoFrame: string) => {
+        lastBotVideoFrame = videoFrame;
         // Emitir el fotograma a todos los demás clientes conectados
-        socket.broadcast.emit('receive-video-stream', data);
+        socket.broadcast.emit('receive-video-stream', videoFrame);
     });
 
     socket.on('gps-update', (rawCoors: string | Coors) => {
-        let coors: Coors = { latitude: 0, longitude: 0 };
+        let botCoors: Coors = { latitude: 0, longitude: 0 };
 
         if (typeof rawCoors === 'string') {
             if (!isValidJson(rawCoors)) {
@@ -29,13 +33,14 @@ io.on('connection', (socket) => {
                 return;
             }
 
-            coors = JSON.parse(rawCoors);
+            botCoors = JSON.parse(rawCoors);
         } else {
-            coors = rawCoors;
+            botCoors = rawCoors;
         }
 
+        lastBotGpsCoors = botCoors;
         // Emitir los datos GPS a todos los demás clientes conectados
-        socket.broadcast.emit('receive-gps-update', coors);
+        socket.broadcast.emit('receive-gps-update', botCoors);
     });
 
     socket.on('disconnect', () => {

@@ -106,6 +106,7 @@
 
     // Recibir actualizaciones GPS
     socket.on('receive-gps-update', (data) => {
+      console.log('Receive coordinates', data);
       const { latitude, longitude } = data;
       marker.setLatLng([latitude, longitude]);
       map.panTo([latitude, longitude]);

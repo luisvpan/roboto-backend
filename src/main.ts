@@ -20,14 +20,22 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('receive-video-stream', data);
     });
 
-    socket.on('gps-update', (data: string) => {
-        if (!isValidJson(data)) {
-            console.log('Datos GPS recibidos no válidos:', data);
-            return;
+    socket.on('gps-update', (rawCoors: string | Coors) => {
+        let coors: Coors = { latitude: 0, longitude: 0 };
+
+        if (typeof rawCoors === 'string') {
+            if (!isValidJson(rawCoors)) {
+                console.log('Datos GPS recibidos no válidos:', rawCoors);
+                return;
+            }
+
+            coors = JSON.parse(rawCoors);
+        } else {
+            coors = rawCoors;
         }
 
         // Emitir los datos GPS a todos los demás clientes conectados
-        socket.broadcast.emit('receive-gps-update', data);
+        socket.broadcast.emit('receive-gps-update', coors);
     });
 
     socket.on('disconnect', () => {
@@ -49,4 +57,9 @@ function isValidJson(data: string): boolean {
     } catch (e) {
         return false;
     }
+}
+
+interface Coors {
+    latitude: number;
+    longitude: number;
 }

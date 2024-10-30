@@ -15,7 +15,7 @@ app.get('/', (req: Request, res: Response) => {
 io.on('connection', (socket) => {
     console.log('Cliente conectado');
 
-    socket.on('video-stream', (data: any) => {
+    socket.on('video-stream', (data: string) => {
         // Emitir el fotograma a todos los demás clientes conectados
         socket.broadcast.emit('video-stream', data);
     });

@@ -17,7 +17,17 @@ io.on('connection', (socket) => {
 
     socket.on('video-stream', (data: string) => {
         // Emitir el fotograma a todos los demás clientes conectados
-        socket.broadcast.emit('video-stream', data);
+        socket.broadcast.emit('receive-video-stream', data);
+    });
+
+    socket.on('gps-update', (data: string) => {
+        if (!isValidJson(data)) {
+            console.log('Datos GPS recibidos no válidos:', data);
+            return;
+        }
+
+        // Emitir los datos GPS a todos los demás clientes conectados
+        socket.broadcast.emit('receive-gps-update', data);
     });
 
     socket.on('disconnect', () => {
@@ -30,3 +40,13 @@ const PORT = 4050;
 server.listen(PORT, () => {
     console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
+
+// Helpers
+function isValidJson(data: string): boolean {
+    try {
+        JSON.parse(data);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}

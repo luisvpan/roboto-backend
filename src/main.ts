@@ -19,12 +19,14 @@ io.on('connection', (socket) => {
     console.log('Cliente conectado');
 
     socket.on('video-stream', (videoFrame: string) => {
+        console.log('Fotograma de video recibido');
         lastBotVideoFrame = videoFrame;
         // Emitir el fotograma a todos los demás clientes conectados
         socket.broadcast.emit('receive-video-stream', videoFrame);
     });
 
     socket.on('gps-update', (rawCoors: string | Coors) => {
+        console.log('Datos GPS recibidos');
         let botCoors: Coors = { latitude: 0, longitude: 0 };
 
         if (typeof rawCoors === 'string') {

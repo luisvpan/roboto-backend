@@ -1,10 +1,25 @@
 import express, { Request, Response } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
+import cors from 'cors';
+
 
 const app = express();
+
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+}));
+
+
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST'],
+    },
+});
 
 let lastBotVideoFrame: string = '';
 let lastBotGpsCoors: Coors = { latitude: 0, longitude: 0 };

@@ -59,6 +59,15 @@ io.on('connection', (socket) => {
         // Emitir los datos GPS a todos los demás clientes conectados
         socket.broadcast.emit('receive-gps-update', botCoors);
     });
+    socket.on('move', (direction: string) => {
+        console.log(`Dirección recibida: ${direction}`);
+        // Aquí puedes agregar la lógica para manejar el movimiento del bot
+    });
+
+    socket.on('speed', (speed: number) => {
+        console.log(`Velocidad recibida: ${speed}`);
+        // Aquí puedes agregar la lógica para la velocidad del bot
+    });
 
     socket.on('disconnect', () => {
         console.log('Cliente desconectado');

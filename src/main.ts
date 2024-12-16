@@ -1,33 +1,19 @@
-import express, { Request, Response } from "express";
-import http from "http";
-import { Server, Socket } from "socket.io";
-import cors from "cors";
+import { Request, Response } from "express";
+import { Socket } from "socket.io";
 import { MoveCommand, moveRobot } from "./backend-client";
-import WebSocket from "ws";
+import { initServer } from './bootstrap/server';
 
-const app = express();
-
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["Content-Type"],
-  })
-);
-
-const gpsSocket = new WebSocket("http://10.68.17.134:8000/current-location");
-const cameraSocket = new WebSocket("http://10.68.17.134:8000/kamavinga")
-
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
+const { gpsSocket, cameraSocket, app, io } = initServer();
 
 let lastBotVideoFrame: string = "";
-let lastBotGpsCoors: Coords = { latitude: 0, longitude: 0 };
+let lastBotLocationData: LocationData = {
+  coors: {
+    latitude: 0,
+    longitude: 0
+  },
+  orientation: 0,
+  speed: 0
+}
 const clientsPool: Socket[] = [];
 
 // Ruta para servir el cliente
@@ -36,15 +22,25 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 gpsSocket.onmessage = (event) => {
-  const data = JSON.parse(event.data.toString());
+  const data: RawLocationData = JSON.parse(event.data.toString());
   const coords: Coords = {
-    longitude: data.coordinates[0],
-    latitude: data.coordinates[1],
+    longitude: data.coordinates.coordinates[0],
+    latitude: data.coordinates.coordinates[1],
   };
+
+  lastBotLocationData = {
+    coors: coords,
+    orientation: data.orientation,
+    speed: data.speed
+  }
+  console.log("GPS Data", lastBotLocationData);
 
   clientsPool.forEach((socket) => {
     socket.emit("receive-gps-update", coords);
+    socket.emit("receive-gps-speed", data.speed);
+    socket.emit("receive-gps-orientation", data.orientation);
   });
+
 };
 
 cameraSocket.onmessage = (event) => {
@@ -59,34 +55,9 @@ cameraSocket.onmessage = (event) => {
 io.on("connection", (socket) => {
   clientsPool.push(socket);
 
-  socket.on("video-stream", (videoFrame: string) => {
-    console.log("Fotograma de video recibido");
-    lastBotVideoFrame = videoFrame;
-    // Emitir el fotograma a todos los demás clientes conectados
-    socket.broadcast.emit("receive-video-stream", videoFrame);
-  });
-
-  socket.on("move", (command: MoveCommand) => {
-    console.log(`Dirección recibida: ${JSON.stringify(command)}`);
-    // Aquí puedes agregar la lógica para manejar el movimiento del bot
-
-    moveRobot(command);
-  });
-
-  socket.on("speed", (speed: number) => {
-    console.log(`Velocidad recibida: ${speed}`);
-    // Aquí puedes agregar la lógica para la velocidad del bot
-  });
-
   socket.on("disconnect", () => {
     console.log("Cliente desconectado");
   });
-});
-
-// Iniciar el servidor
-const PORT = 4050;
-server.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
 
 // Helpers
@@ -102,4 +73,18 @@ function isValidJson(data: string): boolean {
 interface Coords {
   latitude: number;
   longitude: number;
+}
+
+interface LocationData {
+  coors: Coords;
+  orientation: number;
+  speed: number;
+}
+
+interface RawLocationData {
+  coordinates: {
+    coordinates: [number, number];
+  },
+  orientation: number;
+  speed: number;
 }

@@ -22,6 +22,8 @@ let lastBotCurrentStatus: CurrentStatus = {
   movementSpeed: 0 // Esta (si se llegara a implementar) es la velocidad "teorica" establecida para el bot
 }
 const clientsPool: Socket[] = [];
+//const coorsQueues: Coords[] = []; <--- for the path mode
+const targetCoords: Coords = { latitude: 0, longitude: 0 };
 
 gpsSocket.onmessage = (event) => {
   const txtJson = event.data.toString();

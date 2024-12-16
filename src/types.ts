@@ -21,7 +21,8 @@ export interface RawLocationData {
 export enum MovementMode {
   CONTROL = "control",
   DOG = "dog",
-  MAP = "map"
+  MAP = "map",
+  PATH = "path" // not implemented
 }
 
 export interface RawCurrentStatus {

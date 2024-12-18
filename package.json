@@ -8,6 +8,7 @@
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "http": "^0.0.1-security",
+    "npx": "^10.2.2",
     "socket.io": "^4.8.0",
     "typescript": "^5.6.3",
     "ws": "8.18.0"
@@ -15,7 +16,8 @@
   "scripts": {
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
     "start": "node dist/main.js",
-    "build": "tsc"
+    "build": "tsc",
+    "exec-ts": "ts-node src/main.ts"
   },
   "devDependencies": {
     "nodemon": "^3.1.7",

@@ -48,7 +48,10 @@ export async function changeMode(movement_mode: MovementMode): Promise<CurrentSt
 
 export async function changeTarget(targetCoords: { latitude: number, longitude: number }): Promise<CurrentStatus> {
     const response = await backendClient.put<ChangeTargetResponse>('/change-target', {
-        target_coords: targetCoords
+        data: JSON.stringify({
+            latitude: targetCoords.latitude,
+            longitude: targetCoords.longitude
+        })
     })
 
     if (response.data.status !== "success") {

@@ -109,7 +109,13 @@ io.on('connection', async (socket) => {
   })
 
   // Cambiar el target
-  socket.on('change-target', async (targetCoords: { latitude: number, longitude: number }) => {
+  socket.on('change-target', async (_targetCoords: { position: { lat: number, lng: number } }) => {
+    console.log(`Target recibido: ${JSON.stringify(_targetCoords)}`)
+    const targetCoords = {
+      latitude: _targetCoords.position.lat,
+      longitude: _targetCoords.position.lng
+    }
+
     if (lastBotCurrentStatus.movementMode === MovementMode.MAP) {
       console.log(`Target recibido: ${JSON.stringify(targetCoords)}`)
       lastBotCurrentStatus = await changeTarget(targetCoords)

@@ -64,6 +64,7 @@ gpsSocket.onmessage = (event) => {
     orientation: data.orientation,
     speed: data.speed
   }
+  console.log('orientation', data.orientation)
   //console.log("GPS Data", lastBotLocationData);
 
   clientsPool.forEach((socket) => {

@@ -29,10 +29,14 @@ export interface RawCurrentStatus {
   movement_mode: MovementMode;
   running: boolean;
   movement_speed: number;
+  target_coords: { latitude: number, longitude: number };
+  target_orientation: number;
 }
 
 export interface CurrentStatus {
   movementMode: MovementMode;
   running: boolean;
   movementSpeed: number;
+  targetCoords: Coords;
+  targetOrientation: number;
 }

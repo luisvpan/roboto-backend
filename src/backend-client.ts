@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { BASE_URL } from "./constants";
 import { CurrentStatus, MovementMode, RawCurrentStatus } from "./types";
+import { raw } from "express";
 
 export type MoveCommand = "forward" | "backward" | "turn_left" | "turn_right" | "stop" | "stop_motors"
 
@@ -45,6 +46,34 @@ export async function changeMode(movement_mode: MovementMode): Promise<CurrentSt
     return formatCurrentStatus(response.data.current_status)
 }
 
+export async function changeTarget(targetCoords: { latitude: number, longitude: number }): Promise<CurrentStatus> {
+    const response = await backendClient.put<ChangeTargetResponse>('/change-target', {
+        target_coords: targetCoords
+    })
+
+    if (response.data.status !== "success") {
+        throw new Error("Error changing target")
+    }
+
+    return formatCurrentStatus(response.data.current_status)
+}
+
+/*
+@app.put("/change-target")
+async def change_target(command: Command):
+    print("change_target")
+    print(command)
+
+    global target_coords
+    target_coords = command.target_coords
+
+    return {
+            "status": "success",
+            "target_coords": target_coords,
+            "current_status": get_current_status()
+        }
+*/
+
 export async function getCurrentStatus(): Promise<CurrentStatus> {
     const response = await backendClient.get<CurrentStatusResponse>('/current-status')
 
@@ -60,13 +89,21 @@ function formatCurrentStatus(rawCurrentStatus: RawCurrentStatus): CurrentStatus 
     return {
         movementMode: rawCurrentStatus.movement_mode,
         running: rawCurrentStatus.running,
-        movementSpeed: rawCurrentStatus.movement_speed
+        movementSpeed: rawCurrentStatus.movement_speed,
+        targetCoords: { latitude: rawCurrentStatus.target_coords.latitude, longitude: rawCurrentStatus.target_coords.longitude },
+        targetOrientation: rawCurrentStatus.target_orientation
     }
 }
 
 export interface MovementResponse {
     status: string;
     command: string;
+    current_status: RawCurrentStatus;
+}
+
+export interface ChangeTargetResponse {
+    status: string;
+    target_coords: { latitude: number, longitude: number };
     current_status: RawCurrentStatus;
 }
 

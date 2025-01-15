@@ -3,6 +3,7 @@ import { Socket } from 'socket.io'
 import {
   changeMode,
   changeSpeed,
+  changeTarget,
   getCurrentStatus,
   MoveCommand,
   moveRobot
@@ -33,11 +34,17 @@ let lastBotLocationData: LocationData = {
 let lastBotCurrentStatus: CurrentStatus = {
   movementMode: MovementMode.CONTROL,
   running: false,
-  movementSpeed: 0 // Esta (si se llegara a implementar) es la velocidad "teorica" establecida para el bot
+  movementSpeed: 0, // Esta (si se llegara a implementar) es la velocidad "teorica" establecida para el bot
+  // Map Mode
+  targetCoords: { latitude: 0, longitude: 0 },
+  targetOrientation: 0,
 }
 const clientsPool: Socket[] = []
 //const coorsQueues: Coords[] = []; <--- for the path mode
-const targetCoords: Coords = { latitude: 0, longitude: 0 }
+
+// Waypoints Mode
+const waypointsCoors: Coords[] = [];
+
 
 gpsSocket.onmessage = (event) => {
   const txtJson = event.data.toString()
@@ -100,6 +107,20 @@ io.on('connection', async (socket) => {
     lastBotCurrentStatus = await changeMode(mode)
     socket.emit('receive-current-status', lastBotCurrentStatus)
   })
+
+  // Cambiar el target
+  socket.on('change-target', async (targetCoords: { latitude: number, longitude: number }) => {
+    if (lastBotCurrentStatus.movementMode === MovementMode.MAP) {
+      console.log(`Target recibido: ${JSON.stringify(targetCoords)}`)
+      lastBotCurrentStatus = await changeTarget(targetCoords)
+      socket.emit('receive-current-status', lastBotCurrentStatus)
+    } else if (lastBotCurrentStatus.movementMode === MovementMode.PATH) {
+      console.log(`Target recibido: ${JSON.stringify(targetCoords)}`)
+      lastBotCurrentStatus = await changeTarget(targetCoords)
+      waypointsCoors.push(targetCoords)
+      socket.emit('receive-current-status', lastBotCurrentStatus)
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('Cliente desconectado')

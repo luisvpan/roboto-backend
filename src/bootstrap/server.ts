@@ -17,7 +17,7 @@ export function initServer(): ServerInstances {
   )
 
   console.log('Intentando conectar', BASE_URL)
-  const gpsSocket = new WebSocket(`${BASE_URL}/current-location`)
+  //const gpsSocket = new WebSocket(`${BASE_URL}/current-location`)
   const cameraSocket = new WebSocket(`${BASE_URL}/socket-camera`)
 
   const server = http.createServer(app)
@@ -33,7 +33,7 @@ export function initServer(): ServerInstances {
   })
 
   return {
-    gpsSocket,
+    //gpsSocket,
     cameraSocket,
     server,
     app,
@@ -42,7 +42,7 @@ export function initServer(): ServerInstances {
 }
 
 export interface ServerInstances {
-  gpsSocket: WebSocket
+  //gpsSocket: WebSocket
   cameraSocket: WebSocket
   server: http.Server
   io: Server

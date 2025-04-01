@@ -5,6 +5,7 @@ import {
   changeSpeed,
   changeTarget,
   getCurrentStatus,
+  getSensorData,
   MoveCommand,
   moveRobot,
 } from "./backend-client";
@@ -27,6 +28,7 @@ const {
 console.log("Server is running");
 
 let lastBotVideoFrame: string = "";
+let lastSensorData: number[] = [];
 let lastBotLocationData: LocationData = {
   coors: {
     latitude: 0,
@@ -99,6 +101,12 @@ io.on("connection", async (socket) => {
     console.log(`Dirección recibida: ${JSON.stringify(command)}`);
     lastBotCurrentStatus = await moveRobot(command);
     socket.emit("receive-current-status", lastBotCurrentStatus);
+  });
+
+  socket.on("sensors", async () => {
+    lastSensorData = await getSensorData();
+    console.log("lastSensorData ", lastSensorData);
+    socket.emit("receive-current-sensors", lastSensorData);
   });
 
   // Esto cambia la velocidad teorica si llegase a implementarse en el frontend y el python

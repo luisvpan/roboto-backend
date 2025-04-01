@@ -14,7 +14,7 @@
     "ws": "8.18.0"
   },
   "scripts": {
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/main.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/main.ts",
     "start": "node dist/main.js",
     "build": "tsc",
     "exec-ts": "ts-node src/main.ts"
